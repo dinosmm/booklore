@@ -19,7 +19,7 @@ export class SetupRedirectGuard implements CanActivate {
         if (!res.data) {
           this.router.navigate(['/setup']);
         } else {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/all-books']);
         }
         return false;
       })
