@@ -511,6 +511,7 @@
     "title": "Filters",
     "showingFirst100": "Showing first 100 items",
     "footerNoteN": "Note: Top {{count}} items are displayed per filter category",
+    "footerNote100": "Note: Top 100 items are displayed per filter category",
     "footerNote": "Note: Currently showing all items for every  filter category",
     "labels": {
       "author": "Author",
