@@ -60,6 +60,7 @@ Organize, read, annotate, sync across devices, and share, all without relying on
 | 📚 | **Default view is Books** | The default view has been changed to 'All Books' instead of the Dashboard |
 | 💯 | **Full Descriptions** | The full, untruncated description is fetched from the book file on import |
 
+---
 
 ## 🚀 Quick Start
 
