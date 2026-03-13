@@ -216,7 +216,7 @@ public class AudiobookProcessor extends AbstractFileProcessor implements BookFil
 
         metadata.setTitle(truncate(audioMetadata.getTitle(), 1000));
         metadata.setSubtitle(truncate(audioMetadata.getSubtitle(), 1000));
-        metadata.setDescription(truncate(audioMetadata.getDescription(), 2000));
+        metadata.setDescription(audioMetadata.getDescription());
         metadata.setPublisher(truncate(audioMetadata.getPublisher(), 1000));
         metadata.setPublishedDate(audioMetadata.getPublishedDate());
         metadata.setSeriesName(truncate(audioMetadata.getSeriesName(), 1000));

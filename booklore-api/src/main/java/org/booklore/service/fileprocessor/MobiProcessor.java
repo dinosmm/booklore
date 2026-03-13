@@ -107,7 +107,7 @@ public class MobiProcessor extends AbstractFileProcessor implements BookFileProc
 
         metadata.setTitle(truncate(mobiMetadata.getTitle(), 1000));
         metadata.setSubtitle(truncate(mobiMetadata.getSubtitle(), 1000));
-        metadata.setDescription(truncate(mobiMetadata.getDescription(), 2000));
+        metadata.setDescription(mobiMetadata.getDescription());
         metadata.setPublisher(truncate(mobiMetadata.getPublisher(), 1000));
         metadata.setPublishedDate(mobiMetadata.getPublishedDate());
         metadata.setSeriesName(truncate(mobiMetadata.getSeriesName(), 1000));

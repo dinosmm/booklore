@@ -128,7 +128,7 @@ public class PdfProcessor extends AbstractFileProcessor implements BookFileProce
                 bookEntity.getMetadata().setPublisher(extracted.getPublisher());
             }
             if (StringUtils.isNotBlank(extracted.getDescription())) {
-                bookEntity.getMetadata().setDescription(truncate(extracted.getDescription(), 5000));
+                bookEntity.getMetadata().setDescription(extracted.getDescription());
             }
             if (extracted.getPublishedDate() != null) {
                 bookEntity.getMetadata().setPublishedDate(extracted.getPublishedDate());

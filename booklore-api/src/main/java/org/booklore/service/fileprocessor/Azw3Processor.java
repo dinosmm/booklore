@@ -106,7 +106,7 @@ public class Azw3Processor extends AbstractFileProcessor implements BookFileProc
 
         metadata.setTitle(truncate(azw3Metadata.getTitle(), 1000));
         metadata.setSubtitle(truncate(azw3Metadata.getSubtitle(), 1000));
-        metadata.setDescription(truncate(azw3Metadata.getDescription(), 2000));
+        metadata.setDescription(azw3Metadata.getDescription());
         metadata.setPublisher(truncate(azw3Metadata.getPublisher(), 1000));
         metadata.setPublishedDate(azw3Metadata.getPublishedDate());
         metadata.setSeriesName(truncate(azw3Metadata.getSeriesName(), 1000));

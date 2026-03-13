@@ -114,7 +114,7 @@ public class EpubProcessor extends AbstractFileProcessor implements BookFileProc
 
         metadata.setTitle(truncate(epubMetadata.getTitle(), 1000));
         metadata.setSubtitle(truncate(epubMetadata.getSubtitle(), 1000));
-        metadata.setDescription(truncate(epubMetadata.getDescription(), 2000));
+        metadata.setDescription(epubMetadata.getDescription());
         metadata.setPublisher(truncate(epubMetadata.getPublisher(), 1000));
         metadata.setPublishedDate(epubMetadata.getPublishedDate());
         metadata.setSeriesName(truncate(epubMetadata.getSeriesName(), 1000));
