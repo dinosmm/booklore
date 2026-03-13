@@ -102,7 +102,7 @@ public class Fb2Processor extends AbstractFileProcessor implements BookFileProce
 
         metadata.setTitle(truncate(fb2Metadata.getTitle(), 1000));
         metadata.setSubtitle(truncate(fb2Metadata.getSubtitle(), 1000));
-        metadata.setDescription(truncate(fb2Metadata.getDescription(), 2000));
+        metadata.setDescription(fb2Metadata.getDescription());
         metadata.setPublisher(truncate(fb2Metadata.getPublisher(), 1000));
         metadata.setPublishedDate(fb2Metadata.getPublishedDate());
         metadata.setSeriesName(truncate(fb2Metadata.getSeriesName(), 1000));
