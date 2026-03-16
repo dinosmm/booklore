@@ -730,4 +730,38 @@ class BookGroupingServiceTest {
         assertThat(groupCount(groups)).isEqualTo(2);
         assertThat(totalFiles(groups)).isEqualTo(4);
     }
+
+    @Test
+    void bookPerFolder_calibreDataFilesAreGroupedWithParentBookFolder() {
+        var path = pathEntity(1L, "/books");
+        var lib = library(LibraryOrganizationMode.BOOK_PER_FOLDER, path);
+
+        List<LibraryFile> files = List.of(
+                ebook(path, "Author/Title", "Title - Author.epub"),
+                ebook(path, "Author/Title/data", "solutions.pdf")
+        );
+
+        var groups = bookGroupingService.groupForInitialScan(files, lib);
+
+        assertThat(groupCount(groups)).isEqualTo(1);
+        assertThat(totalFiles(groups)).isEqualTo(2);
+    }
+
+    @Test
+    void bookPerFolder_calibreDataWithoutParentBookStaysSeparate() {
+        var path = pathEntity(1L, "/books");
+        var lib = library(LibraryOrganizationMode.BOOK_PER_FOLDER, path);
+
+        List<LibraryFile> files = List.of(
+                ebook(path, "Author/Other Book", "Other Book.epub"),
+                ebook(path, "Author/Title/data", "solutions.pdf")
+        );
+
+        var groups = bookGroupingService.groupForInitialScan(files, lib);
+
+        assertThat(groupCount(groups)).isEqualTo(2);
+    }
+
 }
+
+

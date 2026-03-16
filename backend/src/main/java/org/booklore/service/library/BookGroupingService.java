@@ -117,6 +117,12 @@ public class BookGroupingService {
                 }
             } else {
                 String key = pathId + ":" + subPath;
+		if (isCalibreDataSubPath(subPath)) {
+                    String ancestorKey = findNearestEbookAncestor(pathId, subPath, ebookFolders);
+                    if (ancestorKey != null) {
+                        key = ancestorKey;
+                    }
+                }
                 result.computeIfAbsent(key, k -> new ArrayList<>()).add(file);
             }
         }
@@ -144,6 +150,21 @@ public class BookGroupingService {
         return null;
     }
 
+    private boolean isCalibreDataSubPath(String subPath) {
+        if (subPath == null || subPath.isBlank()) {
+            return false;
+        }
+
+        String normalized = subPath.replace('\\', '/');
+        for (String part : normalized.split("/")) {
+            if ("data".equalsIgnoreCase(part)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
     private BookEntity findMatchingBook(LibraryFile file, LibraryOrganizationMode mode) {
         BookEntity filelessMatch = switch (mode) {
             case BOOK_PER_FILE, BOOK_PER_FOLDER -> findExactFilelessMatch(file, file.getLibraryEntity());
@@ -170,7 +191,8 @@ public class BookGroupingService {
                 .toList();
 
         if (activeBooksInDirectory.isEmpty()) {
-            if (mode == LibraryOrganizationMode.BOOK_PER_FOLDER && file.getBookFileType() == BookFileType.AUDIOBOOK) {
+            if (mode == LibraryOrganizationMode.BOOK_PER_FOLDER
+                    && (file.getBookFileType() == BookFileType.AUDIOBOOK || isCalibreDataSubPath(fileSubPath))) {
                 return findNearestAncestorBookWithEbook(libraryPathId, fileSubPath);
             }
             return null;
