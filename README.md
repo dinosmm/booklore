@@ -43,7 +43,20 @@ Organize, read, annotate, sync across devices, and share without relying on thir
 
 ---
 
-## Quick Start
+## ✨ Enhanced/changed Features in this fork
+
+| | Feature | Description |
+|:---:|:---|:---|
+| 🔤 | **Improved sidebar filter sorting** | Sidebar filter items are alphabetically sorted, making it easier to find the one you're looking for |
+| 🔍 | **More sidebar filters visible** | Up to 500 filter items are visible, with scope in the code to implement a user-facing setting |
+| 📚 | **Default view is Books** | The default view has been changed to 'All Books' instead of the Dashboard |
+| 💯 | **Full Descriptions** | The full, untruncated description is fetched from the book file on import |
+| 👀 | **See it all** | The full book synopsis is shown by default, without having to press on 'show more' |
+
+---
+
+## 🚀 Quick Start
+>>>>>>> 03160f43 (Document enhanced features in README)
 
 > [!TIP]
 > For OIDC setup, advanced configuration, or upgrade guides, see the [full documentation](https://grimmory.org/docs/getting-started).
