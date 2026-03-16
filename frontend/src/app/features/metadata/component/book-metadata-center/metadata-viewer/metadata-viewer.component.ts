@@ -400,7 +400,7 @@ export class MetadataViewerComponent implements OnInit, OnChanges, AfterViewChec
   bookInSeries: Book[] = [];
   @ViewChild(Image) private coverImage?: Image;
   @ViewChild('descriptionContent') descriptionContentRef?: ElementRef<HTMLElement>;
-  isExpanded = false;
+  isExpanded = true;
   isOverflowing = false;
   isComicSectionExpanded = true;
   showFilePath = false;
