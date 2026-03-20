@@ -1,3 +1,9 @@
+## [2.2.6](https://github.com/grimmory-tools/grimmory/compare/v2.2.5...v2.2.6) (2026-03-20)
+
+### Bug Fixes
+
+* **bookservice:** fix of missing cover images by returning ByteArrayResource ([#59](https://github.com/grimmory-tools/grimmory/issues/59)) ([b658a0a](https://github.com/grimmory-tools/grimmory/commit/b658a0a778cd9945be502737d7ef1a25770dc123))
+
 ## [2.2.5](https://github.com/grimmory-tools/grimmory/compare/v2.2.4...v2.2.5) (2026-03-20)
 
 ### Bug Fixes
