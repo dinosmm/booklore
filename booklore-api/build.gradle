@@ -10,8 +10,9 @@ plugins {
 group = 'org.booklore'
 version = '0.0.1-SNAPSHOT'
 
-def frontendDistDir = providers.gradleProperty('frontendDistDir')
-        .orElse("${rootDir}/../booklore-ui/dist/booklore/browser")
+def defaultFrontendDistDir = file("${rootDir}/../booklore-ui/dist/booklore/browser")
+def configuredFrontendDistDir = providers.gradleProperty('frontendDistDir')
+        .map { file(it) }
 
 java {
     toolchain {
@@ -145,12 +146,17 @@ jacocoTestReport {
 }
 
 tasks.named('processResources') {
-    def frontendResourcesDir = providers.provider { file(frontendDistDir.get()) }
-    inputs.dir(frontendResourcesDir)
-            .withPropertyName('frontendDistDir')
-            .optional()
-    from(frontendResourcesDir) {
-        into 'static'
+    def frontendResourcesDir = configuredFrontendDistDir
+            .orElse(providers.provider { defaultFrontendDistDir })
+            .get()
+
+    inputs.property('frontendDistDir', frontendResourcesDir.absolutePath)
+    inputs.property('hasFrontendResources', frontendResourcesDir.exists())
+
+    if (frontendResourcesDir.exists()) {
+        from(frontendResourcesDir) {
+            into 'static'
+        }
     }
 }
 
