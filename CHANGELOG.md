@@ -1,3 +1,9 @@
+## [2.2.5](https://github.com/grimmory-tools/grimmory/compare/v2.2.4...v2.2.5) (2026-03-20)
+
+### Bug Fixes
+
+* **frontend:** fix user permissions checks to use optional chaining ([#58](https://github.com/grimmory-tools/grimmory/issues/58)) ([5fc4773](https://github.com/grimmory-tools/grimmory/commit/5fc4773431a385235632d9d1a25846729ab51ff8))
+
 ## [2.2.4](https://github.com/grimmory-tools/grimmory/compare/v2.2.3...v2.2.4) (2026-03-20)
 
 ### Bug Fixes
