@@ -1,6 +1,11 @@
 name: Nightly - Build and Publish
 
 on:
+  push:
+    branches:
+      - dms
+
+on:
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
