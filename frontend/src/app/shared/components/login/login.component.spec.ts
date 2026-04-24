@@ -173,7 +173,7 @@ describe('LoginComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/change-password']);
   });
 
-  it('navigates to the dashboard after a successful non-default-password login', () => {
+  it('navigates to all-books after a successful non-default-password login', () => {
     configureComponent();
     authService.internalLogin.mockReturnValue(of({isDefaultPassword: 'false'}));
 
@@ -181,7 +181,7 @@ describe('LoginComponent', () => {
     component.password = 'password';
     component.login();
 
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(router.navigate).toHaveBeenCalledWith(['/all-books']);
   });
 
   it('shows translated messages for network and rate-limit login failures', () => {

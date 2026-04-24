@@ -103,12 +103,12 @@ describe('setup and login guards', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/setup']);
   });
 
-  it('sends users from the root route to the dashboard when setup is complete', async () => {
+  it('sends users from the root route to all-books when setup is complete', async () => {
     const resultPromise = firstValueFrom(setupRedirectGuard.canActivate());
     const request = httpTestingController.expectOne(setupStatusUrl);
     request.flush({data: true});
 
     await expect(resultPromise).resolves.toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(router.navigate).toHaveBeenCalledWith(['/all-books']);
   });
 });

@@ -129,7 +129,7 @@ export class LoginComponent implements OnInit {
         if (response.isDefaultPassword === 'true') {
           this.router.navigate(['/change-password']);
         } else {
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/all-books']);
         }
       },
       error: (error) => {
