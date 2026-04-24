@@ -121,6 +121,10 @@ public class ContentRestrictionService {
                 .collect(Collectors.toList());
     }
 
+    public boolean hasRestrictions(Long userId) {
+        return restrictionRepository.existsByUserId(userId);
+    }
+
     private Set<String> getValuesForTypeAndMode(List<UserContentRestrictionEntity> restrictions,
                                                  ContentRestrictionType type,
                                                  ContentRestrictionMode mode) {
