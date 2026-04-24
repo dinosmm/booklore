@@ -44,12 +44,16 @@ export class BookFilterComponent {
 
   readonly activeFilters = signal<Record<string, unknown[]>>({});
   readonly expandedPanels = signal<number[]>([]);
+  private readonly wasFilterVisible = signal(false);
 
   private readonly visibleFilters = signal<VisibleFilterType[]>([...DEFAULT_VISIBLE_FILTERS]);
 
   readonly visibleFilterTypes = computed(() => {
     const vf = this.visibleFilters();
-    return vf.filter(f => this.filterTypes.includes(f as FilterType)) as FilterType[];
+    return vf
+      .filter(f => this.filterTypes.includes(f as FilterType))
+      .map(f => f as FilterType)
+      .sort((a, b) => this.getFilterLabel(a).localeCompare(this.getFilterLabel(b), undefined, {sensitivity: 'base'}));
   });
 
   readonly filterLabelKeys = FILTER_LABEL_KEYS;
@@ -68,6 +72,19 @@ export class BookFilterComponent {
     const user = this.userService.currentUser();
     if (!user) return;
     this.visibleFilters.set(user.userSettings.visibleFilters ?? [...DEFAULT_VISIBLE_FILTERS]);
+  });
+
+  private readonly autoExpandVisiblePanels = effect(() => {
+    const isVisible = this.showFilter();
+    if (!isVisible) {
+      this.wasFilterVisible.set(false);
+      return;
+    }
+
+    if (!this.wasFilterVisible()) {
+      this.expandedPanels.set(this.getAutoExpandedPanels());
+      this.wasFilterVisible.set(true);
+    }
   });
 
   onFilterModeChange(mode: BookFilterMode): void {
@@ -103,7 +120,7 @@ export class BookFilterComponent {
 
   clearActiveFilter(): void {
     this.activeFilters.set({});
-    this.expandedPanels.set([]);
+    this.expandedPanels.set(this.getAutoExpandedPanels());
     this.filterSelected.emit(null);
   }
 
@@ -141,6 +158,15 @@ export class BookFilterComponent {
     const active = this.activeFilters()[filterType];
     if (!active) return false;
     return active.some(v => v === filterId || String(v) === String(filterId));
+  }
+
+  getSortedFilters(filterType: FilterType): Filter[] {
+    return [...this.filterSignals[filterType]()].sort((a, b) =>
+      this.getFilterValueDisplay(a).localeCompare(this.getFilterValueDisplay(b), undefined, {
+        sensitivity: 'base',
+        numeric: true
+      })
+    );
   }
 
   private handleSingleMode(filterType: string, value: unknown): void {
@@ -183,13 +209,21 @@ export class BookFilterComponent {
     const filters = this.activeFilters();
     const hasFilters = Object.keys(filters).length > 0;
     this.filterSelected.emit(hasFilters ? {...filters} : null);
+  }
 
-    // Update expanded panels to show panels with active filters
-    const panels = new Set<number>();
+  private getAutoExpandedPanels(): number[] {
     const types = this.visibleFilterTypes();
-    types.forEach((type, i) => {
-      if (filters[type]?.length) panels.add(i);
-    });
-    this.expandedPanels.set([...panels]);
+    const filters = this.activeFilters();
+    const defaultExpandedFilter: FilterType = 'category';
+    const defaultIndex = types.findIndex(type => type === defaultExpandedFilter);
+
+    if (defaultIndex === -1) {
+      return [];
+    }
+
+    const hasOptions = this.getSortedFilters(defaultExpandedFilter).length > 0;
+    const hasActiveFilters = (filters[defaultExpandedFilter]?.length ?? 0) > 0;
+
+    return hasOptions || hasActiveFilters ? [defaultIndex] : [];
   }
 }

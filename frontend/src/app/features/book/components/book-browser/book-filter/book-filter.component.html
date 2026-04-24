@@ -17,7 +17,7 @@
   <div class="filter-content">
     <p-accordion [value]="expandedPanels()" [multiple]="true" (valueChange)="onExpandedPanelsChange($event)">
       @for (filterType of visibleFilterTypes(); track filterType; let i = $index) {
-        @if (filterSignals[filterType]().length > 0 || activeFilters()[filterType]?.length) {
+        @if (getSortedFilters(filterType).length > 0 || activeFilters()[filterType]?.length) {
           <p-accordion-panel [value]="i">
             <p-accordion-header>
               <span class="filter-type-label">
@@ -36,10 +36,10 @@
               @if (expandedPanels().includes(i)) {
                 <cdk-virtual-scroll-viewport
                   [itemSize]="28"
-                  [style.height.px]="getVirtualScrollHeight(filterSignals[filterType]().length)"
+                  [style.height.px]="getVirtualScrollHeight(getSortedFilters(filterType).length)"
                   class="filter-list">
                   <div
-                    *cdkVirtualFor="let filter of filterSignals[filterType](); trackBy: trackByFilter"
+                    *cdkVirtualFor="let filter of getSortedFilters(filterType); trackBy: trackByFilter"
                     class="filter-row"
                     role="button"
                     tabindex="0"

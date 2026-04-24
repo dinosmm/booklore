@@ -121,7 +121,7 @@ describe('OidcCallbackComponent', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/change-password']);
   });
 
-  it('saves tokens and redirects to the dashboard after a successful exchange', () => {
+  it('saves tokens and redirects to all-books after a successful exchange', () => {
     oidcService.retrievePkceState.mockReturnValue({
       codeVerifier: 'verifier',
       nonce: 'nonce',
@@ -136,7 +136,7 @@ describe('OidcCallbackComponent', () => {
     configureComponent('?code=code-123&state=state-123');
 
     expect(authService.saveInternalTokens).toHaveBeenCalledWith('access', 'refresh');
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(router.navigate).toHaveBeenCalledWith(['/all-books']);
   });
 
   it('redirects to login with the backend error message when the exchange fails', () => {
