@@ -50,13 +50,13 @@ describe('SetupRedirectGuard', () => {
     expect(router.navigate).toHaveBeenCalledWith(['/setup']);
   });
 
-  it('sends users to the dashboard when setup is complete', async () => {
+  it('sends users to all-books when setup is complete', async () => {
     const resultPromise = firstValueFrom(guard.canActivate());
 
     const request = httpTestingController.expectOne(setupStatusUrl);
     request.flush({data: true});
 
     await expect(resultPromise).resolves.toBe(false);
-    expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
+    expect(router.navigate).toHaveBeenCalledWith(['/all-books']);
   });
 });
