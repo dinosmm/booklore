@@ -199,7 +199,16 @@ public class AppBookSpecification {
     }
 
     public static Specification<BookEntity> hasDigitalFile() {
-        return (root, query, cb) -> cb.isNotEmpty(root.get("bookFiles"));
+        return (root, query, cb) -> {
+            Subquery<Long> subquery = query.subquery(Long.class);
+            Root<BookFileEntity> bookFileRoot = subquery.from(BookFileEntity.class);
+            subquery.select(bookFileRoot.get("book").get("id"))
+                    .where(
+                            cb.equal(bookFileRoot.get("book").get("id"), root.get("id")),
+                            cb.isTrue(bookFileRoot.get("isBookFormat"))
+                    );
+            return cb.exists(subquery);
+        };
     }
 
     public static Specification<BookEntity> hasAudiobookFile() {

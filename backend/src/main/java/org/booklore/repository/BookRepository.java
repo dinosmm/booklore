@@ -81,7 +81,15 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
 
     // Only ToOne paths in EntityGraph; collections (authors, categories, moods, tags, shelves, bookFiles) loaded via @BatchSize.
     @EntityGraph(attributePaths = {"metadata", "metadata.comicMetadata", "library"})
-    @Query("SELECT b FROM BookEntity b WHERE (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     List<BookEntity> findAllWithMetadata();
 
     @EntityGraph(attributePaths = {
@@ -99,7 +107,16 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
         "metadata.authors", "metadata.categories", "metadata.moods", "metadata.tags",
         "shelves", "libraryPath", "library", "bookFiles"
     })
-    @Query("SELECT b FROM BookEntity b WHERE b.library.id = :libraryId AND (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE b.library.id = :libraryId
+            AND (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     List<BookEntity> findAllWithMetadataByLibraryId(@Param("libraryId") Long libraryId);
 
     @EntityGraph(attributePaths = {"metadata", "bookFiles", "library"})
@@ -121,7 +138,16 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
 
     // Only ToOne paths in EntityGraph; collections (authors, categories, moods, tags, shelves, bookFiles) loaded via @BatchSize.
     @EntityGraph(attributePaths = {"metadata", "metadata.comicMetadata", "library"})
-    @Query("SELECT b FROM BookEntity b WHERE b.library.id IN :libraryIds AND (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE b.library.id IN :libraryIds
+            AND (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     List<BookEntity> findAllWithMetadataByLibraryIds(@Param("libraryIds") Collection<Long> libraryIds);
 
     @EntityGraph(attributePaths = {
@@ -225,7 +251,13 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
             """)
     long countByLibraryIdAndBookType(@Param("libraryId") Long libraryId, @Param("type") BookFileType type);
 
-    @Query("SELECT COUNT(b) FROM BookEntity b WHERE b.library.id = :libraryId AND (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT COUNT(DISTINCT b) FROM BookEntity b
+            JOIN b.bookFiles bf
+            WHERE b.library.id = :libraryId
+              AND bf.isBookFormat = true
+              AND (b.deleted IS NULL OR b.deleted = false)
+            """)
     long countByLibraryId(@Param("libraryId") Long libraryId);
 
     @Query("""
@@ -447,7 +479,15 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
      * Only ToOne paths in EntityGraph to avoid Cartesian product; collections loaded via @BatchSize.
      */
     @EntityGraph(attributePaths = {"metadata", "metadata.comicMetadata", "libraryPath", "library"})
-    @Query("SELECT b FROM BookEntity b WHERE (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     Page<BookEntity> findAllWithMetadataPaged(Pageable pageable);
 
     /**
@@ -455,7 +495,16 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
      * Only ToOne paths in EntityGraph to avoid Cartesian product; collections loaded via @BatchSize.
      */
     @EntityGraph(attributePaths = {"metadata", "metadata.comicMetadata", "libraryPath", "library"})
-    @Query("SELECT b FROM BookEntity b WHERE b.library.id = :libraryId AND (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE b.library.id = :libraryId
+            AND (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     Page<BookEntity> findAllWithMetadataByLibraryIdPaged(@Param("libraryId") Long libraryId, Pageable pageable);
 
     @Query("SELECT COUNT(b) FROM BookEntity b WHERE (b.deleted IS NULL OR b.deleted = false)")
@@ -483,7 +532,15 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
      * collections (authors, categories, tags, moods, shelves, bookFiles) loaded via @BatchSize.
      */
     @EntityGraph(attributePaths = {"metadata", "metadata.comicMetadata", "libraryPath", "library"})
-    @Query("SELECT b FROM BookEntity b WHERE (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     Page<BookEntity> findAllWithMetadataPage(Pageable pageable);
 
     /**
@@ -492,7 +549,16 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
      * collections (authors, categories, tags, moods, shelves, bookFiles) loaded via @BatchSize.
      */
     @EntityGraph(attributePaths = {"metadata", "metadata.comicMetadata", "libraryPath", "library"})
-    @Query("SELECT b FROM BookEntity b WHERE b.library.id IN :libraryIds AND (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT b FROM BookEntity b
+            WHERE b.library.id IN :libraryIds
+            AND (b.deleted IS NULL OR b.deleted = false)
+            AND EXISTS (
+                SELECT 1 FROM BookFileEntity bf
+                WHERE bf.book = b
+                AND bf.isBookFormat = true
+            )
+            """)
     Page<BookEntity> findAllWithMetadataByLibraryIdsPage(@Param("libraryIds") Collection<Long> libraryIds, Pageable pageable);
 
     /**
