@@ -44,6 +44,7 @@ export class BookFilterComponent {
 
   readonly activeFilters = signal<Record<string, unknown[]>>({});
   readonly expandedPanels = signal<number[]>([]);
+  private readonly wasFilterVisible = signal(false);
 
   private readonly visibleFilters = signal<VisibleFilterType[]>([...DEFAULT_VISIBLE_FILTERS]);
 
@@ -74,6 +75,16 @@ export class BookFilterComponent {
   });
 
   private readonly autoExpandVisiblePanels = effect(() => {
+    const isVisible = this.showFilter();
+    if (!isVisible) {
+      this.wasFilterVisible.set(false);
+      return;
+    }
+
+    if (!this.wasFilterVisible()) {
+      this.expandedPanels.set(this.getAutoExpandedPanels());
+      this.wasFilterVisible.set(true);
+    }
     if (!this.showFilter()) return;
     this.expandedPanels.set(this.getAutoExpandedPanels());
   });
@@ -205,6 +216,17 @@ export class BookFilterComponent {
   private getAutoExpandedPanels(): number[] {
     const types = this.visibleFilterTypes();
     const filters = this.activeFilters();
+    const defaultExpandedFilter: FilterType = 'category';
+    const defaultIndex = types.findIndex(type => type === defaultExpandedFilter);
+
+    if (defaultIndex === -1) {
+      return [];
+    }
+
+    const hasOptions = this.getSortedFilters(defaultExpandedFilter).length > 0;
+    const hasActiveFilters = (filters[defaultExpandedFilter]?.length ?? 0) > 0;
+
+    return hasOptions || hasActiveFilters ? [defaultIndex] : [];
 
     return types
       .map((type, index) => ({type, index}))
