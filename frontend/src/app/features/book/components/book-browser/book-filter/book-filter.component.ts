@@ -85,6 +85,8 @@ export class BookFilterComponent {
       this.expandedPanels.set(this.getAutoExpandedPanels());
       this.wasFilterVisible.set(true);
     }
+    if (!this.showFilter()) return;
+    this.expandedPanels.set(this.getAutoExpandedPanels());
   });
 
   onFilterModeChange(mode: BookFilterMode): void {
@@ -225,5 +227,10 @@ export class BookFilterComponent {
     const hasActiveFilters = (filters[defaultExpandedFilter]?.length ?? 0) > 0;
 
     return hasOptions || hasActiveFilters ? [defaultIndex] : [];
+
+    return types
+      .map((type, index) => ({type, index}))
+      .filter(({type}) => this.getSortedFilters(type).length > 0 || (filters[type]?.length ?? 0) > 0)
+      .map(({index}) => index);
   }
 }
