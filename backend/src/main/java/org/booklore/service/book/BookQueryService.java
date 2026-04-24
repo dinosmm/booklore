@@ -29,28 +29,55 @@ public class BookQueryService {
     private final ContentRestrictionService contentRestrictionService;
 
     public List<Book> getAllBooks(boolean includeDescription, boolean stripForListView) {
-        List<BookEntity> books = bookRepository.findAllWithMetadata();
+        List<BookEntity> books = deduplicateById(bookRepository.findAllWithMetadata());
         return mapBooksToDto(books, includeDescription, null, stripForListView);
     }
 
     public List<Book> getAllBooksByLibraryIds(Set<Long> libraryIds, boolean includeDescription, boolean StripForListView, Long userId) {
         List<BookEntity> books = bookRepository.findAllWithMetadataByLibraryIds(libraryIds);
         books = contentRestrictionService.applyRestrictions(books, userId);
+        books = deduplicateById(books);
         return mapBooksToDto(books, includeDescription, userId, StripForListView);
     }
 
     public Page<Book> getAllBooksPaged(Pageable pageable) {
         Page<BookEntity> page = bookRepository.findAllWithMetadataPage(pageable);
-        return page.map(book -> mapBookToDto(book, false, null, true));
+        List<BookEntity> deduplicated = deduplicateById(page.getContent());
+        List<Book> dtos = deduplicated.stream()
+                .map(book -> mapBookToDto(book, false, null, true))
+                .toList();
+        return new PageImpl<>(dtos, pageable, page.getTotalElements());
     }
 
     public Page<Book> getAllBooksByLibraryIdsPaged(Collection<Long> libraryIds, Long userId, Pageable pageable) {
         Page<BookEntity> page = bookRepository.findAllWithMetadataByLibraryIdsPage(libraryIds, pageable);
         List<BookEntity> filtered = contentRestrictionService.applyRestrictions(page.getContent(), userId);
+        filtered = deduplicateById(filtered);
         List<Book> dtos = filtered.stream()
                 .map(book -> mapBookToDto(book, false, userId, true))
                 .toList();
-        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+
+        long totalElements = page.getTotalElements();
+        if (contentRestrictionService.hasRestrictions(userId)) {
+            List<BookEntity> allCandidates = bookRepository.findAllWithMetadataByLibraryIds(libraryIds);
+            totalElements = contentRestrictionService.applyRestrictions(allCandidates, userId).size();
+        }
+
+        return new PageImpl<>(dtos, pageable, totalElements);
+    }
+
+    private List<BookEntity> deduplicateById(List<BookEntity> books) {
+        if (books == null || books.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, BookEntity> byId = new LinkedHashMap<>();
+        for (BookEntity book : books) {
+            if (book != null && book.getId() != null) {
+                byId.putIfAbsent(book.getId(), book);
+            }
+        }
+        return new ArrayList<>(byId.values());
     }
 
     public List<BookEntity> getAllFullBookEntitiesBatch(Pageable pageable) {
