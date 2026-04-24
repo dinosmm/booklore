@@ -1,10 +1,8 @@
 name: Nightly - Build and Publish
 
-#on:
-#  schedule:
-#    - cron: '0 4 * * *'
-#  workflow_dispatch:
-
+on:
+  workflow_dispatch:
+  
 jobs:
   resolve_ref:
     name: Resolve Nightly Ref
