@@ -130,4 +130,76 @@ class BookRepositoryDataJpaTest {
         assertThat(bookEntity.getId()).isEqualTo(book.getId());
         assertThat(bookEntity.getPrimaryBookFile()).isNotNull();
     }
+
+    @Test
+    void countByLibraryId_countsOnlyBooksWithBookFiles() {
+        LibraryEntity library = LibraryEntity.builder()
+                .name("Count Library")
+                .icon("book")
+                .watch(false)
+                .formatPriority(List.of(BookFileType.EPUB))
+                .build();
+        entityManager.persist(library);
+
+        LibraryPathEntity libraryPath = LibraryPathEntity.builder()
+                .library(library)
+                .path("/count/path")
+                .build();
+        entityManager.persist(libraryPath);
+
+        BookEntity fileBackedBook = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(fileBackedBook);
+
+        BookEntity filelessBook = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(filelessBook);
+
+        BookEntity deletedFileBackedBook = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(true)
+                .build();
+        entityManager.persist(deletedFileBackedBook);
+
+        entityManager.persist(BookFileEntity.builder()
+                .book(fileBackedBook)
+                .fileName("one.epub")
+                .fileSubPath("")
+                .isBookFormat(true)
+                .bookType(BookFileType.EPUB)
+                .fileSizeKb(123L)
+                .initialHash("h1")
+                .currentHash("h1")
+                .addedOn(Instant.now())
+                .build());
+
+        entityManager.persist(BookFileEntity.builder()
+                .book(deletedFileBackedBook)
+                .fileName("two.epub")
+                .fileSubPath("")
+                .isBookFormat(true)
+                .bookType(BookFileType.EPUB)
+                .fileSizeKb(456L)
+                .initialHash("h2")
+                .currentHash("h2")
+                .addedOn(Instant.now())
+                .build());
+
+        entityManager.flush();
+
+        long count = bookRepository.countByLibraryId(library.getId());
+
+        assertThat(count).isEqualTo(1);
+    }
+
 }
