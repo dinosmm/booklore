@@ -225,7 +225,13 @@ public interface BookRepository extends JpaRepository<BookEntity, Long>, JpaSpec
             """)
     long countByLibraryIdAndBookType(@Param("libraryId") Long libraryId, @Param("type") BookFileType type);
 
-    @Query("SELECT COUNT(b) FROM BookEntity b WHERE b.library.id = :libraryId AND (b.deleted IS NULL OR b.deleted = false)")
+    @Query("""
+            SELECT COUNT(DISTINCT b) FROM BookEntity b
+            JOIN b.bookFiles bf
+            WHERE b.library.id = :libraryId
+              AND bf.isBookFormat = true
+              AND (b.deleted IS NULL OR b.deleted = false)
+            """)
     long countByLibraryId(@Param("libraryId") Long libraryId);
 
     @Query("""
