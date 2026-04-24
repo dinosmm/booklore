@@ -3,6 +3,7 @@ package org.booklore.repository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.booklore.BookloreApplication;
+import org.booklore.app.specification.AppBookSpecification;
 import org.booklore.model.entity.*;
 import org.booklore.model.enums.BookFileType;
 import org.booklore.service.task.TaskCronService;
@@ -13,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.transaction.annotation.Transactional;
@@ -200,6 +202,159 @@ class BookRepositoryDataJpaTest {
         long count = bookRepository.countByLibraryId(library.getId());
 
         assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void hasDigitalFile_spec_excludesBooksWithOnlyNonBookFiles() {
+        LibraryEntity library = LibraryEntity.builder()
+                .name("Spec Library")
+                .icon("book")
+                .watch(false)
+                .formatPriority(List.of(BookFileType.EPUB))
+                .build();
+        entityManager.persist(library);
+
+        LibraryPathEntity libraryPath = LibraryPathEntity.builder()
+                .library(library)
+                .path("/spec/path")
+                .build();
+        entityManager.persist(libraryPath);
+
+        BookEntity bookWithBookFile = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(bookWithBookFile);
+
+        BookEntity bookWithOnlyAdditionalFile = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(bookWithOnlyAdditionalFile);
+
+        BookEntity filelessBook = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(filelessBook);
+
+        entityManager.persist(BookFileEntity.builder()
+                .book(bookWithBookFile)
+                .fileName("primary.epub")
+                .fileSubPath("")
+                .isBookFormat(true)
+                .bookType(BookFileType.EPUB)
+                .fileSizeKb(123L)
+                .initialHash("bk1")
+                .currentHash("bk1")
+                .addedOn(Instant.now())
+                .build());
+
+        entityManager.persist(BookFileEntity.builder()
+                .book(bookWithOnlyAdditionalFile)
+                .fileName("notes.txt")
+                .fileSubPath("")
+                .isBookFormat(false)
+                .bookType(BookFileType.EPUB)
+                .fileSizeKb(12L)
+                .initialHash("add1")
+                .currentHash("add1")
+                .addedOn(Instant.now())
+                .build());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        long count = bookRepository.count(AppBookSpecification.combine(
+                AppBookSpecification.notDeleted(),
+                AppBookSpecification.inLibrary(library.getId()),
+                AppBookSpecification.hasDigitalFile()
+        ));
+
+        assertThat(count).isEqualTo(1);
+    }
+
+    @Test
+    void findAllWithMetadata_queries_excludeBooksWithoutBookFormatFiles() {
+        LibraryEntity library = LibraryEntity.builder()
+                .name("Metadata Query Library")
+                .icon("book")
+                .watch(false)
+                .formatPriority(List.of(BookFileType.EPUB))
+                .build();
+        entityManager.persist(library);
+
+        LibraryPathEntity libraryPath = LibraryPathEntity.builder()
+                .library(library)
+                .path("/metadata/query/path")
+                .build();
+        entityManager.persist(libraryPath);
+
+        BookEntity included = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(included);
+
+        BookEntity additionalOnly = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(additionalOnly);
+
+        BookEntity fileless = BookEntity.builder()
+                .library(library)
+                .libraryPath(libraryPath)
+                .addedOn(Instant.now())
+                .deleted(false)
+                .build();
+        entityManager.persist(fileless);
+
+        entityManager.persist(BookFileEntity.builder()
+                .book(included)
+                .fileName("included.epub")
+                .fileSubPath("")
+                .isBookFormat(true)
+                .bookType(BookFileType.EPUB)
+                .fileSizeKb(120L)
+                .initialHash("inc1")
+                .currentHash("inc1")
+                .addedOn(Instant.now())
+                .build());
+
+        entityManager.persist(BookFileEntity.builder()
+                .book(additionalOnly)
+                .fileName("cover.jpg")
+                .fileSubPath("")
+                .isBookFormat(false)
+                .bookType(BookFileType.EPUB)
+                .fileSizeKb(10L)
+                .initialHash("add2")
+                .currentHash("add2")
+                .addedOn(Instant.now())
+                .build());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        assertThat(bookRepository.findAllWithMetadata())
+                .extracting(BookEntity::getId)
+                .containsExactly(included.getId());
+        assertThat(bookRepository.findAllWithMetadataByLibraryId(library.getId()))
+                .extracting(BookEntity::getId)
+                .containsExactly(included.getId());
+        assertThat(bookRepository.findAllWithMetadataPage(PageRequest.of(0, 10)).getTotalElements()).isEqualTo(1);
+        assertThat(bookRepository.findAllWithMetadataByLibraryIdPaged(library.getId(), PageRequest.of(0, 10)).getTotalElements()).isEqualTo(1);
     }
 
 }
