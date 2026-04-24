@@ -32,4 +32,6 @@ public interface UserContentRestrictionRepository extends JpaRepository<UserCont
             @Param("mode") ContentRestrictionMode mode);
 
     boolean existsByUserIdAndRestrictionTypeAndValue(Long userId, ContentRestrictionType type, String value);
+
+    boolean existsByUserId(Long userId);
 }

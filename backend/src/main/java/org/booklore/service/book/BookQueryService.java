@@ -50,7 +50,14 @@ public class BookQueryService {
         List<Book> dtos = filtered.stream()
                 .map(book -> mapBookToDto(book, false, userId, true))
                 .toList();
-        return new PageImpl<>(dtos, pageable, page.getTotalElements());
+
+        long totalElements = page.getTotalElements();
+        if (contentRestrictionService.hasRestrictions(userId)) {
+            List<BookEntity> allCandidates = bookRepository.findAllWithMetadataByLibraryIds(libraryIds);
+            totalElements = contentRestrictionService.applyRestrictions(allCandidates, userId).size();
+        }
+
+        return new PageImpl<>(dtos, pageable, totalElements);
     }
 
     public List<BookEntity> getAllFullBookEntitiesBatch(Pageable pageable) {
