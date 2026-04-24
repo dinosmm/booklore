@@ -63,4 +63,22 @@ class BookQueryServiceTest {
         assertThat(result.getTotalElements()).isEqualTo(2);
         assertThat(result.getContent()).hasSize(1);
     }
+
+    @Test
+    void getAllBooksByLibraryIds_deduplicatesDuplicateBookRowsById() {
+        Set<Long> libraryIds = Set.of(10L);
+        Long userId = 7L;
+
+        BookEntity duplicateA = BookEntity.builder().id(1L).build();
+        BookEntity duplicateB = BookEntity.builder().id(1L).build();
+
+        when(bookRepository.findAllWithMetadataByLibraryIds(eq(libraryIds))).thenReturn(List.of(duplicateA, duplicateB));
+        when(contentRestrictionService.applyRestrictions(eq(List.of(duplicateA, duplicateB)), eq(userId))).thenReturn(List.of(duplicateA, duplicateB));
+        when(bookMapperV2.toDTO(any(BookEntity.class))).thenReturn(Book.builder().id(1L).build());
+
+        List<Book> result = bookQueryService.getAllBooksByLibraryIds(libraryIds, false, true, userId);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().getId()).isEqualTo(1L);
+    }
 }
